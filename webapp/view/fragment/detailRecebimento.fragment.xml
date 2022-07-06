@@ -1,0 +1,79 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" 
+	xmlns:t="sap.ui.table"
+	 xmlns:f="sap.ui.layout.form"
+     xmlns="sap.m"
+     
+     xmlns:html="http://www.w3.org/1999/xhtml">
+
+<Dialog title = "{i18n>titlePage}" 
+     beforeOpen="onBeforeOpen" class="dialog"
+     >
+
+
+        <f:SimpleForm id="SimpleFormDisplay354"
+           	editable="false"
+			layout="ColumnLayout"
+          	columnsM="2"
+			columnsL="3"
+			columnsXL="4"
+		
+			singleContainerFullSize="false">
+            <f:content>
+				<Label text="Lote" />
+				<Input id="idLote" value="{filtro/Lote}"  width="100px" />
+				<Label text="Centro Origem" />
+				<Input id="idcentro_origem" value="{filtro/Centro_Origem}" width="100px" editable="false"/>
+                <Label text="Centro Destino" />
+				<Input id="idcentro_destino" value="{filtro/Centro_Destino}"  width="100px" editable="false"/>
+                <Label text="Nº Documento" />
+				<Input id="iddocnum" value="{filtro/docnum}"  width="100px" editable="false"/>
+                <Label text="Nfe Número" />
+				<Input id="idnfe" value="{filtro/nfenum}"  width="100px" editable="false"/>
+                 <Label text="Chave de Acesso" />
+				<Input id="idChave" value="{filtro/nfenum}"  width="300px" editable="false"/>
+			</f:content>
+            
+    </f:SimpleForm>
+       <buttons>
+            <Button
+                
+                enabled="true"
+               
+                iconDensityAware="true"
+                iconFirst="true"
+                text="Fechar"
+                press="onCancel"
+                textDirection="Inherit"
+                type="Back"
+                 />
+
+       </buttons>
+
+       <Table id="idEmployeesTable"
+        items="{ZCDS_ZSTSD125}">
+        <headerToolbar>
+            <Toolbar>
+                <Title text="{i18n>titleLog}"/>
+            </Toolbar>
+        </headerToolbar>
+        <columns>
+            <Column>
+                <Text text="Status" />
+            </Column>
+            
+        </columns>
+        <items>
+            <ColumnListItem>
+                <cells>
+                    <Text
+                        text="{Lote}" />
+                    
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+   </Dialog>
+  
+
+
+</core:FragmentDefinition>

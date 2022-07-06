@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+    <edmx:DataServices m:DataServiceVersion="2.0">
+        <Schema Namespace="ZSTSD364_SRV" xml:lang="pt" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+            <Annotation Term="Core.SchemaVersion" String="1.0.0" xmlns="http://docs.oasis-open.org/odata/ns/edm"/>
+            <EntityType Name="SOInput" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="ILifnr"/>
+                </Key>
+                <Property Name="ILifnr" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Fornecedor" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="ICharg" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Lote" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <NavigationProperty Name="TChargSet" Relationship="ZSTSD364_SRV.A_INPUT" FromRole="FromRole_A_INPUT" ToRole="ToRole_A_INPUT"/>
+                <NavigationProperty Name="TReturnSet" Relationship="ZSTSD364_SRV.A_RETURN" FromRole="FromRole_A_RETURN" ToRole="ToRole_A_RETURN"/>
+                <NavigationProperty Name="SOnputSet" Relationship="ZSTSD364_SRV.A_CHARG" FromRole="ToRole_A_CHARG" ToRole="FromRole_A_CHARG"/>
+            </EntityType>
+            <EntityType Name="TCharg" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="ILifnr"/>
+                </Key>
+                <Property Name="ILifnr" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Fornecedor" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Low" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Lote" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <NavigationProperty Name="TChargSet" Relationship="ZSTSD364_SRV.A_INPUT" FromRole="ToRole_A_INPUT" ToRole="FromRole_A_INPUT"/>
+                <NavigationProperty Name="SOInputSet" Relationship="ZSTSD364_SRV.A_CHARG" FromRole="FromRole_A_CHARG" ToRole="ToRole_A_CHARG"/>
+            </EntityType>
+            <EntityType Name="TReturn" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="Type"/>
+                    <PropertyRef Name="Id"/>
+                </Key>
+                <Property Name="Type" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="Tipo mensagem" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Id" Type="Edm.String" Nullable="false" MaxLength="20" sap:unicode="false" sap:label="Classe de mensagem" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Message" Type="Edm.String" Nullable="false" MaxLength="50" sap:unicode="false" sap:label="Variável mensagens" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Charg" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Lote" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Description" Type="Edm.String" Nullable="false" MaxLength="200" sap:unicode="false" sap:label="Descrição" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+            </EntityType>
+            <EntityType Name="shPlant" sap:content-version="1">
+                <Key>
+                    <PropertyRef Name="Werks"/>
+                </Key>
+                <Property Name="Werks" Type="Edm.String" Nullable="false" MaxLength="4" sap:unicode="false" sap:label="Centro" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Name1" Type="Edm.String" Nullable="false" MaxLength="30" sap:unicode="false" sap:label="Nome 1" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Ort01" Type="Edm.String" Nullable="false" MaxLength="25" sap:unicode="false" sap:label="Local" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="Regio" Type="Edm.String" Nullable="false" MaxLength="3" sap:unicode="false" sap:label="Região" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+            </EntityType>
+            <Association Name="A_CHARG" sap:content-version="1">
+                <End Type="ZSTSD364_SRV.TCharg" Multiplicity="*" Role="FromRole_A_CHARG"/>
+                <End Type="ZSTSD364_SRV.SOInput" Multiplicity="*" Role="ToRole_A_CHARG"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_A_CHARG">
+                        <PropertyRef Name="ILifnr"/>
+                    </Principal>
+                    <Dependent Role="ToRole_A_CHARG">
+                        <PropertyRef Name="ILifnr"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <Association Name="A_RETURN" sap:content-version="1">
+                <End Type="ZSTSD364_SRV.SOInput" Multiplicity="*" Role="FromRole_A_RETURN"/>
+                <End Type="ZSTSD364_SRV.TReturn" Multiplicity="*" Role="ToRole_A_RETURN"/>
+            </Association>
+            <Association Name="A_INPUT" sap:content-version="1">
+                <End Type="ZSTSD364_SRV.SOInput" Multiplicity="*" Role="FromRole_A_INPUT"/>
+                <End Type="ZSTSD364_SRV.TCharg" Multiplicity="*" Role="ToRole_A_INPUT"/>
+                <ReferentialConstraint>
+                    <Principal Role="FromRole_A_INPUT">
+                        <PropertyRef Name="ILifnr"/>
+                    </Principal>
+                    <Dependent Role="ToRole_A_INPUT">
+                        <PropertyRef Name="ILifnr"/>
+                    </Dependent>
+                </ReferentialConstraint>
+            </Association>
+            <EntityContainer Name="ZSTSD364_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+                <EntitySet Name="SOInputSet" EntityType="ZSTSD364_SRV.SOInput" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="TChargSet" EntityType="ZSTSD364_SRV.TCharg" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="TReturnSet" EntityType="ZSTSD364_SRV.TReturn" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <EntitySet Name="shPlantSet" EntityType="ZSTSD364_SRV.shPlant" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1"/>
+                <AssociationSet Name="A_RETURN_AssocSet" Association="ZSTSD364_SRV.A_RETURN" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+                    <End EntitySet="SOInputSet" Role="FromRole_A_RETURN"/>
+                    <End EntitySet="TReturnSet" Role="ToRole_A_RETURN"/>
+                </AssociationSet>
+                <AssociationSet Name="A_CHARGSet" Association="ZSTSD364_SRV.A_CHARG" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+                    <End EntitySet="TChargSet" Role="FromRole_A_CHARG"/>
+                    <End EntitySet="SOInputSet" Role="ToRole_A_CHARG"/>
+                </AssociationSet>
+                <AssociationSet Name="A_INPUTSet" Association="ZSTSD364_SRV.A_INPUT" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+                    <End EntitySet="SOInputSet" Role="FromRole_A_INPUT"/>
+                    <End EntitySet="TChargSet" Role="ToRole_A_INPUT"/>
+                </AssociationSet>
+            </EntityContainer>
+            <atom:link rel="self" href="http://mb1abdb0.bms.com.br:8000/sap/opu/odata/sap/ZSTSD364_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+            <atom:link rel="latest-version" href="http://mb1abdb0.bms.com.br:8000/sap/opu/odata/sap/ZSTSD364_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
