@@ -15,7 +15,7 @@ sap.ui.define([
                 var oModelSAP = this.getOwnerComponent().getModel();
                 oModelSAP.setUseBatch(false);
 
-            },
+            }, 
           
            
             onBeforeOpen: function(){
