@@ -25,14 +25,7 @@
             <smartFilterBar:SmartFilterBar id="smartFilterBar" 
 				entitySet="ZCDS_ZSTSD125" 
 				initialized="onInitializedSmartFilterBar"
-				persistencyKey="SmartFilter_Explored_Family">
-
-				
-				 	
-
-					
-
-
+				persistencyKey="SmartFilter_Receb">
 				<smartFilterBar:layoutData>
 					<FlexItemData shrinkFactor="0"/>
 				</smartFilterBar:layoutData>
@@ -49,10 +42,12 @@
                                     demandPopin="true"
 									growing="true"
 									placeToolbarInTable="true"
-									persistencyKey="SmartTableAnalytical_Explored_Family" 
+									persistencyKey="SmartFilter_Receb" 
 									enableAutoBinding="true"
+									showRowCount="true"
+									
 									beforeRebindTable="onDataReceived"
-									class="sapUiResponsiveContentPadding"
+									
 									>
 
 				<smartTable:customToolbar>

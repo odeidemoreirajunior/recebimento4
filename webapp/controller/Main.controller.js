@@ -31,9 +31,28 @@ sap.ui.define([
             },
 
             onRecebimento: function(oEvent) {
-                var oTable = this.byId("smartTable");
+
+              var aData = [];
+
+
+                //var oTable = this.byId("smartTable");
+                var oTable = this.getView().byId("smartTable");
+                var _itens = oTable.getTable().getSelectedItems();
+                var _columns =  oTable.getTable().getColumns();
+
                 var link = oEvent.getSource();
                 var row = link.getParent().getParent();
+
+                var indices = row.getSelectedIndices();
+                for(var i of indices){
+                   console.log(i)
+                  }  
+
+
+
+
+
+
                 var _indice = row.getSelectedIndex();
                 //var sPath = "/" + oTable._getRowBinding().aKeys[_indice];
                 var sPath =  oTable._getRowBinding().aKeys[_indice];
