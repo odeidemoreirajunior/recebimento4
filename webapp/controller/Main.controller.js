@@ -16,26 +16,7 @@ sap.ui.define([
                 oModelSAP.setUseBatch(false);
 
             },
-            onInitializedSmartFilterBar: function() {
-         
-              var oModel = this.getOwnerComponent().getModel("ZSTSD364_SRV");
-              //Definir valor default para o filtro de Tipo de operação
-              oModel.read("/shPlantSet", {
-                  success: function (oData) {
-                      if (oData.results.length == 1){
-                          var osmartFilter = this.getView().byId("smartFilterBar");
-                        
-                      };
-                        osmartFilter.setFilterData(oDefaultFilter);
-                      }
-
-                   
-              });
-
-
-
-            },
-
+          
            
             onBeforeOpen: function(){
 
@@ -99,6 +80,9 @@ sap.ui.define([
                     iPos = iPos + 6 - scolId.length;
                     var sIdsubstr = scolId.slice(iPos);
                     switch(sIdsubstr) {
+                        case "nfenum":
+                          oLine.setWidth("110px");
+                          break;
                         case "Lote":
                           oLine.setWidth("110px");
                           break;
@@ -106,27 +90,34 @@ sap.ui.define([
                           oLine.setWidth("120px");
                           break;
                         case "Centro_Origem":
-                          oLine.setWidth("130px");
+                          oLine.setWidth("120px");
                           break;
-                        case "Centro_destino":
-                          oLine.setWidth("130px");
+                        case "Centro_Destino":
+                          oLine.setWidth("120px");
                           break;
                         case "ov":
                           oLine.setWidth("90px");
                           break;
                         case "item_ov":
                           oLine.setWidth("90px");
-                           break;
-                        case "remessa":
+                          break;
+                        case "data_expedicao":
+                            oLine.setWidth("120px");
+                            break;
+                     
+
+
+
+
+
+                           case "remessa":
                           oLine.setWidth("120px");
                           break;
                         case "Ntransporte":
                           oLine.setWidth("120px");
                           break;
+                       
                         case "docnum":
-                          oLine.setWidth("120px");
-                          break;
-                        case "NFENUM":
                           oLine.setWidth("100px");
                           break;
                         case "dtfaturamento":
