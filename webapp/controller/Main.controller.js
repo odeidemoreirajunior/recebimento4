@@ -32,35 +32,43 @@ sap.ui.define([
 
             onRecebimento: function(oEvent) {
 
-              var aData = [];
+              var aData = [
+                
 
-
-                //var oTable = this.byId("smartTable");
-                var oTable = this.getView().byId("smartTable");
-                var _itens = oTable.getTable().getSelectedItems();
-                var _columns =  oTable.getTable().getColumns();
-
-                var link = oEvent.getSource();
-                var row = link.getParent().getParent();
-
-                var indices = row.getSelectedIndices();
-                for(var i of indices){
-                   console.log(i)
-                  }  
-
-
-
-
-
-
-                var _indice = row.getSelectedIndex();
-                //var sPath = "/" + oTable._getRowBinding().aKeys[_indice];
-                var sPath =  oTable._getRowBinding().aKeys[_indice];
+              ];
               
-              // Criando o Model
-              var oViewModelTipos = new JSONModel();
-            //  this.getView.setModel(oViewModelTipos, "Recebimento");    
 
+              
+    
+
+            
+
+              var selectedEntries = {};
+             
+              var oTable = this.getView().byId("smartTable");
+                //Pegar as linhas selecionadas.
+              var indices = oTable.getTable().getSelectedIndices();
+              var count = indices.length;
+               
+                for(var i=0;i<count;i++){
+                selectedEntries.Nfe = oTable.getTable().getRows()[i].getCells()[0].getText();
+                selectedEntries.Lote = oTable.getTable().getRows()[i].getCells()[1].getText();
+                selectedEntries.Peso = oTable.getTable().getRows()[i].getCells()[2].getText();
+                selectedEntries.Centro_Origem = oTable.getTable().getRows()[i].getCells()[3].getText();
+                selectedEntries.Centro_Destino = oTable.getTable().getRows()[i].getCells()[4].getText();
+                selectedEntries.OV = oTable.getTable().getRows()[i].getCells()[5].getText();
+                selectedEntries.Item_ov = oTable.getTable().getRows()[i].getCells()[6].getText();
+                selectedEntries.dataexp = oTable.getTable().getRows()[i].getCells()[7].getText();
+                selectedEntries.Material = oTable.getTable().getRows()[i].getCells()[8].getText();
+                selectedEntries.Fornecedor = "";
+                selectedEntries.status = "";
+                
+                aData.push(selectedEntries);
+                }  
+                var oModelDados = new sap.ui.model.json.JSONModel(aData);
+               
+
+                
               if (!this._oDialogTipos) {
 
                 this._oDialogTipos = sap.ui.xmlfragment("linkup.recebimento4.view.fragment.detailRecebimento", this);
@@ -68,25 +76,12 @@ sap.ui.define([
         
               this.getView().addDependent(this._oDialogTipos);
               jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), this._oDialogTipos);
-        
-              var oDataModelTipos = this.getView().getModel();
 
-              var teste = oDataModelTipos.oData[sPath];
-
-
-              var sDados =  [];
-              sDados.push(oDataModelTipos.getProperty(sPath))
-
-              var sDados = oDataModelTipos.getProperty(sPath);
-              //this.getView().setModel(sDados, "filtro")
-              this.getView().setModel(teste, "filtro")
-
-              this._oDialogTipos.setModel(sDados, "filtro");
-              if (_indice >= 0 ){
-               // this._oDialogTipos.setModel(teste,"filtro")
+              if (indices.length > 0){
+                this.getView().setModel(oModelDados,"lista");
+                this._oDialogTipos.setModel(oModelDados,"lista")
                 this._oDialogTipos.open();
               }
-              
        
             },
 
