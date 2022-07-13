@@ -74,8 +74,8 @@
                          <Column width="180px">
                             <m:Label text="{i18n>textFornecedor}" />
                             <template>
-                               <m:ComboBox value="{Codigo}" items="{fornecedor/}">
-								    <c:Item text="{Nome}"/>
+                               <m:ComboBox    value="{Codigo}" items="{fornecedor/}">
+								    <c:Item text="{Codigo}"/>
 							    </m:ComboBox>
                             </template>
                         </Column>

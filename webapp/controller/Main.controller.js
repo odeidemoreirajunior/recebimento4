@@ -1,16 +1,14 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/Filter",
+    'sap/ui/core/library',
     "sap/ui/model/json/JSONModel",
 	"sap/ui/core/AbsoluteCSSSize",
 ],
     /**
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
-    function (Controller,
-	Filter,
-	JSONModel,
-	AbsoluteCSSSize) {
+    function (Controller,coreLibrary,
+	  	JSONModel,	AbsoluteCSSSize) {
         "use strict";
 
         return Controller.extend("linkup.recebimento4.controller.Main", {
@@ -18,10 +16,24 @@ sap.ui.define([
         
 
             onInit: function () {
-                var oModelSAP = this.getOwnerComponent().getModel();
-                oModelSAP.setUseBatch(false);
+              var oModelSAP = this.getOwnerComponent().getModel();
+              oModelSAP.setUseBatch(false);
             },           
-            onBeforeOpen: function(){
+           
+            _onHandleChange: function (oEvent) {
+              var ValueState = coreLibrary.ValueState;
+              var oValidatedComboBox = oEvent.getSource(),
+              
+                sSelectedKey = oValidatedComboBox.getSelectedKey(),
+                sValue = oValidatedComboBox.getValue();
+                oValidatedComboBox.setValueState(ValueState.None);
+        
+              if (!sSelectedKey && sValue) {
+                oValidatedComboBox.setValueState(ValueState.Error);
+                oValidatedComboBox.setValueStateText("Entrar com valor válido!");
+              } else {
+                oValidatedComboBox.setValueState(ValueState.None);
+              }
             },
 
 
@@ -34,61 +46,69 @@ sap.ui.define([
               this._oDialogTipos.close();
             },
 
-            _onReadFornecedor: async function(oCentro){
+            _onReadFornecedor:  function(oCentro){
               var sLifnr = [];
              
               var oModel = this.getView().getModel("ZSTSD364_SRV");
               var sPath = "/FornecedorSet('" + oCentro + "')";
-              const _promisse = new Promise((resolve, reject) => {
-                setTimeout(resolve, 5000);
-
+              return new Promise(function(resolve, reject) {	
 
                 oModel.read(sPath, {
             
                   success: function(oData, response) {
-                     setTimeout(oData, 5000);
-                     sLifnr = $.parseJSON(oData.Lifnr);
-                    
-                                 }.bind(this), 
+                  
+                    sLifnr = $.parseJSON(oData.Lifnr);
+                    resolve(sLifnr);		
+                  }.bind(this), 
 
                   error: function(oError) {
-                     console.log(oError)      }.bind(this)
-                
+                      reject(oError);
+                         }.bind(this)
                 } ) 
-
-
-              })
-               
-
-                
-         
-           
-             
-              console.log(sLifnr)   
-            
-              return  sLifnr ;
+              });
+              
             },
-
 
             onRecebimento: function(oEvent) {
               var aData = [];
+              var _lifnr = [];
+              var _centros = [];
               var selectedEntries = {
-
                 fornecedor :[ {"Codigo": ""
-                           
                             } ]
               };
               
-             
+              // Instanciar a tabela
               var oTable = this.getView().byId("smartTable");
-                //Pegar as linhas selecionadas.
+              //Pegar as linhas selecionadas.
               var indices = oTable.getTable().getSelectedIndices();
+              // Quantidade de linhas selecionadas.
               var count = indices.length;
-              var _lifnr = [];
+              //---------------------------------------------------------------------------------------
+              for(var a=0;a<count;a++){
+                var no1 = indices[a];
 
+                selectedEntries.Nfe = oTable.getTable().getRows()[no1].getCells()[0].getText();
+                selectedEntries.Lote = oTable.getTable().getRows()[no1].getCells()[1].getText();
+                selectedEntries.Peso = oTable.getTable().getRows()[no1].getCells()[2].getText();
+                selectedEntries.Centro_Origem = oTable.getTable().getRows()[no1].getCells()[3].getText();
+                selectedEntries.Centro_Destino = oTable.getTable().getRows()[no1].getCells()[4].getText();
+                selectedEntries.OV = oTable.getTable().getRows()[no1].getCells()[5].getText();
+                selectedEntries.Item_ov = oTable.getTable().getRows()[no1].getCells()[6].getText();
+                selectedEntries.dataexp = oTable.getTable().getRows()[no1].getCells()[7].getText();
+                selectedEntries.Material = oTable.getTable().getRows()[no1].getCells()[8].getText();
+
+                aData.push(selectedEntries);
+                selectedEntries = { fornecedor: [] };
+              }
+
+          
+              //----------------------------------------------------------------------------------------
               
+              var j = 0;
               for(var i=0;i<count;i++){
                   var no = indices[i];
+
                   selectedEntries.Nfe = oTable.getTable().getRows()[no].getCells()[0].getText();
                   selectedEntries.Lote = oTable.getTable().getRows()[no].getCells()[1].getText();
                   selectedEntries.Peso = oTable.getTable().getRows()[no].getCells()[2].getText();
@@ -98,106 +118,46 @@ sap.ui.define([
                   selectedEntries.Item_ov = oTable.getTable().getRows()[no].getCells()[6].getText();
                   selectedEntries.dataexp = oTable.getTable().getRows()[no].getCells()[7].getText();
                   selectedEntries.Material = oTable.getTable().getRows()[no].getCells()[8].getText();
-                  console.log("1")
-                  //_lifnr = this._onReadFornecedor(selectedEntries.Centro_Origem);
+
+                  //Buscar fornecedores de acordo com o centro de origem para cada registro.
+                  this._onReadFornecedor(selectedEntries.Centro_Origem).then(result => {
+                     result.Lifnr;
+
+                    for(j=0;j<result.length;j++){
+                     
+                        selectedEntries.fornecedor.push({"Codigo": result[j].LIFNR })
+                      
+                    };
+  
+                     selectedEntries.status = "Error";
+                     aData.push(selectedEntries);
+                     selectedEntries = { fornecedor: [] };
+
+                    }).then(result => {
+                      if (i = indices.length ){
+                        var oModelDados = new sap.ui.model.json.JSONModel(aData);
                 
-                  
-                  var sLifnr = [];
-             
-                  var oModel = this.getView().getModel("ZSTSD364_SRV");
-                  var sPath = "/FornecedorSet('" + selectedEntries.Centro_Origem + "')";
-                  
-                 
-                  setTimeout(
-                    
-                    
-                    oModel.read(sPath, {
-                
-                      success: function(oData, response) {
-                         setTimeout(oData, 5000);
-                         sLifnr = $.parseJSON(oData.Lifnr);
-                        
-                                     }.bind(this), 
-    
-                      error: function(oError) {
-                         console.log(oError)      }.bind(this)
-                    
-                    } ) 
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    , 5000);
-    
-                   
-                 
-                
+                        if (!this._oDialogTipos) {
 
+                          this._oDialogTipos = sap.ui.xmlfragment("linkup.recebimento4.view.fragment.detailRecebimento", this);
+                        };
 
+                        this.getView().addDependent(this._oDialogTipos);
+                        jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), this._oDialogTipos);
 
+                        if (indices.length > 0){
+                          this.getView().setModel(oModelDados, "lista");
+                          
+                          this._oDialogTipos.setModel(oModelDados)
+                          this._oDialogTipos.open();  
+                        }  //fim do se
+                      }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                  console.log("2")
-                  for(var i=0;i<_lifnr.length;i++){
-
-                    selectedEntries.fornecedor.push({"Codigo": _lifnr[i].Lifnr })
-
-
-                  };
-
-
-                  // selectedEntries.fornecedor.push({"Codigo": "111" })
-                   selectedEntries.status = "Error";
-                   aData.push(selectedEntries);
-             
-                   selectedEntries = { fornecedor: [] };
+                   }).catch(reason => {
+                      
+                    });
 
               };
-              var oModelDados = new sap.ui.model.json.JSONModel(aData);
-            
-              if (!this._oDialogTipos) {
-
-                this._oDialogTipos = sap.ui.xmlfragment("linkup.recebimento4.view.fragment.detailRecebimento", this);
-              };
-        
-              this.getView().addDependent(this._oDialogTipos);
-              jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), this._oDialogTipos);
-
-              if (indices.length > 0){
-                //this.getView().setModel(oModelDados);
-                
-                this._oDialogTipos.setModel(oModelDados)
-                this._oDialogTipos.open();
-              }
-       
             },
 
             onDataReceived: function() {
