@@ -68,14 +68,7 @@ sap.ui.define([
                         "Description": '',
                       }]		
               }										
-
               
-/*              for (var i = 0; i < oData.length; i++ ){
-                _dados[i].ILifnr = oData[i].Fornecero;
-
-              }
-
-*/          
               var aLotes = [];
               var oLote = {};
               oData.forEach(
