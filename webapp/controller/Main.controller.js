@@ -76,8 +76,6 @@ sap.ui.define([
 
                   _dados.ILifnr = retorno.Fornecedor;
                   _dados.ICharg = retorno.Lote;
-                
-                  
                   oLote.ILifnr = retorno.Fornecedor;
                   oLote.Low = retorno.Lote;
                   aLotes.push(oLote)
@@ -116,24 +114,13 @@ sap.ui.define([
                           subtitle: retorno.Message,
                           counter: 1,
                           };
-          
                           aReturn.push(oReturn)
-          
                           }
-
                       )
-
                     }
-
                   })
-
-
-                  
                 }
               )
-
-
-
             },
 
             onCancel: function(){
@@ -168,26 +155,7 @@ sap.ui.define([
                           aData[b].fornecedor.push({"Codigo": sCodigo.Codigo });
                           sCodigo.Codigo = "";
                         };
-
-
-
                     }  
-
-                   /* for (var x = 0; x < aData.length; x++){
-                      var _valor1 = aData[x].Centro_Origem;
-                      //for (var i = 0; i < aCentros.results.length;i++){
-                      for (var i = 0; i < aCentros.results.length;i++){
-                        var _valor2 = aCentros.results[i].Werks;
-                        //if (_valor1 = aCentros.results[i].Werks){
-                        if (_valor1 == _valor2){
-                          sCodigo.Codigo = aCentros.results[i].Lifnr;
-                          aData[x].fornecedor.push({"Codigo": sCodigo.Codigo });
-                          //aData.fornecedor.push({"Codigo": aCentros.results[i].Lifnr })
-                          sCodigo.Codigo = "";
-                        }
-                      }
-                    }*/
-
                   }.bind(this), 
 
                   error: function(oError) {
@@ -197,8 +165,6 @@ sap.ui.define([
                 } ) 
               });
             },
-
-
 
 
           /*  _onReadFornecedor:  function(oCentro){
