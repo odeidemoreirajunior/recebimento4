@@ -2,14 +2,19 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     'sap/ui/core/library',
     "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",	
 	"sap/ui/core/AbsoluteCSSSize",
 ],
     /**
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
     function (Controller,coreLibrary,
-	  	JSONModel,	AbsoluteCSSSize) {
+	  	JSONModel,	Filter,FilterOperator, AbsoluteCSSSize) {
         "use strict";
+
+        var aFilters = [];
+        var aCentros = [];
 
         return Controller.extend("linkup.recebimento4.controller.Main", {
          
@@ -45,6 +50,38 @@ sap.ui.define([
             onCancel: function(){
               this._oDialogTipos.close();
             },
+
+            _createFilter: function(sValue) {
+              
+              aFilters.push(new Filter('Werks', FilterOperator.EQ, sValue));
+            },
+
+            _onListaFornecedor: function(){
+
+              var oModel = this.getView().getModel("ZSTSD364_SRV");
+              var sPath = "/ListaFornecedorSet";
+
+              return new Promise(function(resolve, reject) {	
+                oModel.read(sPath, {
+                  filters: aFilters,
+                  success: function(oData, response) {
+                    aCentros = oData;
+                    resolve(sLifnr);		
+                  }.bind(this), 
+
+                  error: function(oError) {
+                    console.log('Errrouuuuu')
+                    reject(oError);
+                        }.bind(this)
+                } ) 
+              });
+
+
+             
+            },
+
+
+
 
             _onReadFornecedor:  function(oCentro){
               var sLifnr = [];
@@ -92,6 +129,7 @@ sap.ui.define([
                 selectedEntries.Lote = oTable.getTable().getRows()[no1].getCells()[1].getText();
                 selectedEntries.Peso = oTable.getTable().getRows()[no1].getCells()[2].getText();
                 selectedEntries.Centro_Origem = oTable.getTable().getRows()[no1].getCells()[3].getText();
+                this._createFilter(selectedEntries.Centro_Origem);
                 selectedEntries.Centro_Destino = oTable.getTable().getRows()[no1].getCells()[4].getText();
                 selectedEntries.OV = oTable.getTable().getRows()[no1].getCells()[5].getText();
                 selectedEntries.Item_ov = oTable.getTable().getRows()[no1].getCells()[6].getText();
@@ -100,12 +138,28 @@ sap.ui.define([
 
                 aData.push(selectedEntries);
                 selectedEntries = { fornecedor: [] };
+
+               
               }
+              //teste
+              this._onListaFornecedor().then(result => {
+                console.log("teste1")
+
+
+              }).then(result => {
+                console.log("teste")
+
+              }).catch(reason => {
+                      
+              });
+
+             
+
 
           
               //----------------------------------------------------------------------------------------
               
-              var j = 0;
+             /* var j = 0;
               for(var i=0;i<count;i++){
                   var no = indices[i];
 
@@ -155,9 +209,9 @@ sap.ui.define([
 
                    }).catch(reason => {
                       
-                    });
+                   });
 
-              };
+              };*/
             },
 
             onDataReceived: function() {
