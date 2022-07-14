@@ -8,27 +8,22 @@
      xmlns:html="http://www.w3.org/1999/xhtml">
 
    <m:Dialog title = "{i18n>titleItem}" 
-   contentHeight="50%"
-  contentWidth="73%"
+
+        contentHeight="50%"
+        contentWidth="53%"
             beforeOpen="onBeforeOpen" class="dialog"  >
      
                 <Table id="idTableItem"      
                 	selectionMode="None"
-				    visibleRowCount="9"   
+				    visibleRowCount="12"   
                     rows="{/}" >
 	                <columns>
-                    <Column width="100px">
-                            <m:Label text="{i18n>textStatus}" />
-                            <template>
-                               
-
-                                <m:ObjectStatus text="{Status}" state="{
-								path: 'status',
-								formatter: '.formatAvailableToObjectState'
-							}"/>
-
-                            </template>
-                        </Column>
+                        <Column width="120px">
+						    <m:Label text="Log "/>
+						    <template>
+							    <m:Button text="Log Processo" press="onLog"/>
+						    </template>
+					    </Column>
                         <Column width="100px">
                             <m:Label text="{i18n>textNfe}" />
                             <template>
@@ -74,7 +69,7 @@
                          <Column width="180px">
                             <m:Label text="{i18n>textFornecedor}" />
                             <template>
-                               <m:ComboBox    value="{Codigo}" items="{fornecedor/}">
+                               <m:ComboBox  value="{Fornecedor}" items="{fornecedor/}">
 								    <c:Item text="{Codigo}"/>
 							    </m:ComboBox>
                             </template>
