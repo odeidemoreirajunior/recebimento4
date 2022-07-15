@@ -4,13 +4,15 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",	
+    'sap/m/MessagePopover',
+    'sap/m/MessageItem',
 	"sap/ui/core/AbsoluteCSSSize",
 ],
     /**
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
-    function (Controller,coreLibrary,
-	  	JSONModel,	Filter,FilterOperator, AbsoluteCSSSize) {
+    function (Controller,coreLibrary, 
+	  	JSONModel,	Filter,FilterOperator, MessagePopover, MessageItem, AbsoluteCSSSize) {
         "use strict";
 
         var aFilters = [];
@@ -29,7 +31,7 @@ sap.ui.define([
 
         var oLog = [{}];
          
-     
+        var oMessagePopover;
       
         return Controller.extend("linkup.recebimento4.controller.Main", {
          
@@ -39,127 +41,135 @@ sap.ui.define([
               var oModelSAP = this.getOwnerComponent().getModel();
               oModelSAP.setUseBatch(false);
             },           
-           
-         /*   _onHandleChange: function (oEvent) {
-              var ValueState = coreLibrary.ValueState;
-              var oValidatedComboBox = oEvent.getSource(),
+       
+            _onLog : function(oEvent) {
+              //var oTable = sap.ui.getCore().byId("idTableItem");
+            
+              // Seleicionar a linha do click da tabela.
+              var _lote  = oEvent.getSource().getBindingContext().getProperty("Lote")
+              var oVC = this.byId("oVerticalContent");
+             
+              var oModel = new JSONModel();
+              oModel.setData(aMensagem);
+              this._oDialogDetalhes.setModel(oModel,"Messages");
               
-                sSelectedKey = oValidatedComboBox.getSelectedKey(),
-                sValue = oValidatedComboBox.getValue();
-                oValidatedComboBox.setValueState(ValueState.None);
-        
-              if (!sSelectedKey && sValue) {
-                oValidatedComboBox.setValueState(ValueState.Error);
-                oValidatedComboBox.setValueStateText("Entrar com valor válido!");
-              } else {
-                oValidatedComboBox.setValueState(ValueState.None);
-              }
-            },*/
+              var oMessageTemplate = new MessageItem({
+                type: '{Type}',
+                title: '{Lote}',
+              //  activeTitle: "{active}",
+                description: '{Mensagem}',
+            //    subtitle: '{subtitle}',
+              //  counter: '{counter}'
+                
+              });  
 
-            _onLog : function(oText) {
-              var oTable = sap.ui.getCore().byId("idTableItem");
+              oMessagePopover = new MessagePopover({
+                items: {
+                  path: '/Messages/',
+                  template: oMessageTemplate
+                },
+                activeTitlePress: function () {
+                  MessageToast.show('Active title is pressed');
+                }
+              });
 
-
-
-
-             /* var aTypes = ["Information", "Warning", "Error", "Success"],
-              sText = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam, quis nostrud exercitation ullamco.",
-              sType = aTypes[Math.round(Math.random() * 3)],
-              oVC = this.byId("oVerticalContent"),
-              oMsgStrip = new MessageStrip("msgStrip", {
-                text: sText,
-                showCloseButton: !(Math.round(Math.random())),
-                showIcon: !(Math.round(Math.random())),
-                type: sType
-              });*/
-      
-           
-
-
+              oMessagePopover.toggle(oEvent.getSource());
 
 
             },
 
-            onProcess: function(){
+
+            _onProcessarReceb:  function(sFornecedor, sLote, _modelDados ){
+              return new Promise(function(resolve, reject) {	
+                var aLotes = [];
+                var oLote = {};
+                var sPath = "/SOInputSet"
+                oReturn = [];
+              
+                var _dados =	{
+                  "ILifnr" : "",
+                  "ICharg" : '',
+                  "TChargSet" : {
+                    "results" : ""
+                        },
+                  "TReturnSet":[{
+                          "Type":'',
+                          "Id":'',
+                          "Message":'',
+                          "Charg" : '',
+                          "Description": '',
+                        }]		
+                }										
+                _dados.ILifnr = sFornecedor;
+                _dados.ICharg = sLote;
+                oLote.ILifnr = sFornecedor;
+                oLote.Low = sLote;
+                aLotes.push(oLote)
+              
+                _dados.TChargSet.results = aLotes;
+                _modelDados.create(sPath, _dados, {
+                  success: function(data,response){
+                      var _log = {};
+                      for (var z = 0; z < data.TReturnSet.results.length; z++){
+                        switch(data.TReturnSet.results[z].Type) {
+                          case "E":
+                            var _erro = "Error";
+                            break;
+                            case "S":
+                              _erro = "Success";
+                              break;
+                        }
+
+                        var _log = {"Lote": data.TReturnSet.results[z].Charg , 
+                                    "Mensagem" : data.TReturnSet.results[z].Description,
+                                    "Type" : _erro }
+                        aMensagem.push(_log);
+                        aData.forEach(
+                          function(oLine, index) {
+                            
+                            if (oLine.Lote == data.TReturnSet.results[z].Charg)
+                              aData[index].Status = _erro;
+
+                          }
+                        )
+
+                      
+                      };
+                          
+                      resolve(data);	
+                     
+                  }
+                  
+                })
+                
+              }.bind(this));
+            },
+          
+            onProcess: async function(){
+              sap.ui.core.BusyIndicator.show();
+
               oLog = [{}];
               var _table = sap.ui.getCore().byId("idTableItem");
               var oModel = _table.getModel();
               var oModelDados = this.getView().getModel("ZSTSD364_SRV");
-
-
               var oData = oModel.oData;
-              var sPath = "/SOInputSet"
-              oReturn = [];
-
-              var _dados =	{
-                "ILifnr" : "",
-                "ICharg" : '',
-                "TChargSet" : {
-                  "results" : ""
-                      },
-                "TReturnSet":[{
-                        "Type":'',
-                        "Id":'',
-                        "Message":'',
-                        "Charg" : '',
-                        "Description": '',
-                      }]		
-              }										
-              
-              var aLotes = [];
-              var oLote = {};
-              oData.forEach(
-                function(retorno){
-
-                  _dados.ILifnr = retorno.Fornecedor;
-                  _dados.ICharg = retorno.Lote;
-                  oLote.ILifnr = retorno.Fornecedor;
-                  oLote.Low = retorno.Lote;
-                  aLotes.push(oLote)
-
-                  _dados.TChargSet.results = aLotes;
-
-                  oModelDados.create(sPath, _dados, {
-                    success: function(data,response){
-
-                      var that = this
-						          var aReturn = []
-                      var _log = {};
-                      for (var z = 0; z < data.TReturnSet.results.length; z++){
-                        var _log = {"Lote": data.TReturnSet.results[z].Charg , 
-                                     "Mensagem" : data.TReturnSet.results[z].Description }
-                        aMensagem.push(_log);
-
-                      };
-
-
-                      
-                      
-
-
-
-
-						        /* data.TReturnSet.results.forEach(
-                        function(retorno){ 
-                      
-                         oLog.push((retorno));
-                         console.log("teste")
-
-                        }  //fim function retorno
-                       
-                      ); */// fim do foreach
-                      console.log("teste1");
-
-                      
-
-
-
-                    } //Fim do sucess
-                    
-                  }) //fim do oModelDados
-                  console.log("teste2");
-                }
-              )
+   
+              for (var i = 0;i < oData.length; i++ ){
+                await this._onProcessarReceb(oData[i].Fornecedor, oData[i].Lote, oModelDados).then(result => {
+               
+                    console.log("Logica aqui")
+        
+                },this).then(result => {
+                          
+                    console.log("Logica aqui1")
+                  
+                },this).catch(reason => {
+              });
+                
+              }
+              sap.ui.core.BusyIndicator.hide()
+           
+              sap.ui.getCore().byId("idTableItem").getModel().refresh(true) ;
             },
 
             onCancel: function(){
@@ -191,8 +201,13 @@ sap.ui.define([
                       
                         if ( oData.results[a].Werks == aData[b].Centro_Origem){ 
                           sCodigo.Codigo = oData.results[a].Lifnr;
-                          aData[b].fornecedor.push({"Codigo": sCodigo.Codigo });
+                          if ( oData.results.length == 1){
+                            sCodigo.keyValue = oData.results[a].Lifnr;
+                          }
+                          aData[b].fornecedor.push({"Codigo": sCodigo.Codigo, "key":  sCodigo.keyValue   });
                           sCodigo.Codigo = "";
+                         
+                          
                         };
                     }  
                   }.bind(this), 
@@ -204,30 +219,7 @@ sap.ui.define([
                 } ) 
               });
             },
-
-
-          /*  _onReadFornecedor:  function(oCentro){
-              var sLifnr = [];
-             
-              var oModel = this.getView().getModel("ZSTSD364_SRV");
-              var sPath = "/FornecedorSet('" + oCentro + "')";
-              return new Promise(function(resolve, reject) {	
-
-                oModel.read(sPath, {
-            
-                  success: function(oData, response) {
-                    sLifnr = $.parseJSON(oData.Lifnr);
-                    resolve(sLifnr);		
-                  }.bind(this), 
-
-                  error: function(oError) {
-                      reject(oError);
-                         }.bind(this)
-                } ) 
-              });
-              
-            },*/
-
+        
             onRecebimento: function(oEvent) {
               aData = [];
               aCentros = [];
@@ -257,10 +249,9 @@ sap.ui.define([
                 selectedEntries.Item_ov = oTable.getTable().getRows()[no1].getCells()[6].getText();
                 selectedEntries.dataexp = oTable.getTable().getRows()[no1].getCells()[7].getText();
                 selectedEntries.Material = oTable.getTable().getRows()[no1].getCells()[8].getText();
-                selectedEntries.Status = "Não iniciado.."
+                selectedEntries.Status = "None"
                 aData.push(selectedEntries);
                 selectedEntries = { fornecedor: [] };
-
                
               }
               
@@ -282,71 +273,12 @@ sap.ui.define([
                   this._oDialogDetalhes.open();  
                 }  //fim do se
               }).then(result => {
-                console.log("teste")
+               
 
               }).catch(reason => {
                       
               });
 
-             
-
-
-          
-              //----------------------------------------------------------------------------------------
-              
-             /* var j = 0;
-              for(var i=0;i<count;i++){
-                  var no = indices[i];
-
-                  selectedEntries.Nfe = oTable.getTable().getRows()[no].getCells()[0].getText();
-                  selectedEntries.Lote = oTable.getTable().getRows()[no].getCells()[1].getText();
-                  selectedEntries.Peso = oTable.getTable().getRows()[no].getCells()[2].getText();
-                  selectedEntries.Centro_Origem = oTable.getTable().getRows()[no].getCells()[3].getText();
-                  selectedEntries.Centro_Destino = oTable.getTable().getRows()[no].getCells()[4].getText();
-                  selectedEntries.OV = oTable.getTable().getRows()[no].getCells()[5].getText();
-                  selectedEntries.Item_ov = oTable.getTable().getRows()[no].getCells()[6].getText();
-                  selectedEntries.dataexp = oTable.getTable().getRows()[no].getCells()[7].getText();
-                  selectedEntries.Material = oTable.getTable().getRows()[no].getCells()[8].getText();
-
-                  //Buscar fornecedores de acordo com o centro de origem para cada registro.
-                  this._onReadFornecedor(selectedEntries.Centro_Origem).then(result => {
-                     result.Lifnr;
-
-                    for(j=0;j<result.length;j++){
-                     
-                        selectedEntries.fornecedor.push({"Codigo": result[j].LIFNR })
-                      
-                    };
-  
-                     selectedEntries.status = "Error";
-                     aData.push(selectedEntries);
-                     selectedEntries = { fornecedor: [] };
-
-                    }).then(result => {
-                      if (i = indices.length ){
-                        var oModelDados = new sap.ui.model.json.JSONModel(aData);
-                
-                        if (!this._oDialogTipos) {
-
-                          this._oDialogTipos = sap.ui.xmlfragment("linkup.recebimento4.view.fragment.detailRecebimento", this);
-                        };
-
-                        this.getView().addDependent(this._oDialogTipos);
-                        jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), this._oDialogTipos);
-
-                        if (indices.length > 0){
-                          this.getView().setModel(oModelDados, "lista");
-                          
-                          this._oDialogTipos.setModel(oModelDados)
-                          this._oDialogTipos.open();  
-                        }  //fim do se
-                      }
-
-                   }).catch(reason => {
-                      
-                   });
-
-              };*/
             },
 
             onDataReceived: function() {
@@ -382,13 +314,7 @@ sap.ui.define([
                         case "data_expedicao":
                             oLine.setWidth("120px");
                             break;
-                     
-
-
-
-
-
-                           case "remessa":
+                        case "remessa":
                           oLine.setWidth("120px");
                           break;
                         case "Ntransporte":
@@ -412,18 +338,13 @@ sap.ui.define([
                           break;
                         case "Transportadora":
                           oLine.setWidth("120px");
-                          
                           break;
                         case "Chave_acesso":
                           oLine.setWidth("380px");
                           break;
-                       
                       };
                     i++;
                 });
             },
-
-            
-
         });
     });

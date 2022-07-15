@@ -11,17 +11,21 @@
 
         contentHeight="50%"
         contentWidth="63%"
-            beforeOpen="onBeforeOpen" class="dialog"  >
+           class="dialog"  >
      
                 <Table id="idTableItem"      
                 	selectionMode="None"
 				    visibleRowCount="7"   
+
                     rows="{/}" >
+                   	<rowSettingsTemplate>
+				    	<RowSettings highlight="{Status}" highlightText="{Status}"/>
+				    </rowSettingsTemplate>
 	                <columns>
                         <Column width="50px">
 						    <m:Label text="Log "/>
 						    <template>
-							    <m:Button icon="sap-icon://message-information"  press="_onLog"/>
+							    <m:Button id="messagePopoverBtn" icon="sap-icon://message-information"  press="_onLog"/>
 						    </template>
 					    </Column>
                         <Column width="100px">
@@ -69,8 +73,8 @@
                          <Column width="180px">
                             <m:Label text="{i18n>textFornecedor}" />
                             <template>
-                               <m:ComboBox  value="{Fornecedor}" items="{fornecedor/}">
-								    <c:Item text="{Codigo}"/>
+                               <m:ComboBox id="idComboForne"   items="{fornecedor/}">
+								    <c:Item key="{Codigo}" text="{Codigo}"/>
 							    </m:ComboBox>
                             </template>
                         </Column>
