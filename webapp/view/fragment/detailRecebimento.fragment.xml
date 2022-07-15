@@ -10,18 +10,18 @@
    <m:Dialog title = "{i18n>titleItem}" 
 
         contentHeight="50%"
-        contentWidth="53%"
+        contentWidth="63%"
             beforeOpen="onBeforeOpen" class="dialog"  >
      
                 <Table id="idTableItem"      
                 	selectionMode="None"
-				    visibleRowCount="12"   
+				    visibleRowCount="7"   
                     rows="{/}" >
 	                <columns>
-                        <Column width="120px">
+                        <Column width="50px">
 						    <m:Label text="Log "/>
 						    <template>
-							    <m:Button text="Log Processo" press="onLog"/>
+							    <m:Button icon="sap-icon://message-information"  press="_onLog"/>
 						    </template>
 					    </Column>
                         <Column width="100px">

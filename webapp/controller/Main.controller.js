@@ -16,6 +16,21 @@ sap.ui.define([
         var aFilters = [];
         var aCentros = [];
         var aData = [];
+        var aMensagem = [];
+
+        var typeT = "Success"
+        var oReturn = {
+          type : typeT,
+          title: "",
+          description: "",
+          subtitle: "",
+          counter: 1,
+          };
+
+        var oLog = [{}];
+         
+     
+      
         return Controller.extend("linkup.recebimento4.controller.Main", {
          
         
@@ -41,11 +56,32 @@ sap.ui.define([
               }
             },*/
 
-            onLog : function(oEvent) {
-              MessageToast.show("Log " + this.getView().getModel().getProperty("Lote", oEvent.getSource().getBindingContext()));
+            _onLog : function(oText) {
+              var oTable = sap.ui.getCore().byId("idTableItem");
+
+
+
+
+             /* var aTypes = ["Information", "Warning", "Error", "Success"],
+              sText = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam, quis nostrud exercitation ullamco.",
+              sType = aTypes[Math.round(Math.random() * 3)],
+              oVC = this.byId("oVerticalContent"),
+              oMsgStrip = new MessageStrip("msgStrip", {
+                text: sText,
+                showCloseButton: !(Math.round(Math.random())),
+                showIcon: !(Math.round(Math.random())),
+                type: sType
+              });*/
+      
+           
+
+
+
+
             },
 
             onProcess: function(){
+              oLog = [{}];
               var _table = sap.ui.getCore().byId("idTableItem");
               var oModel = _table.getModel();
               var oModelDados = this.getView().getModel("ZSTSD364_SRV");
@@ -53,6 +89,7 @@ sap.ui.define([
 
               var oData = oModel.oData;
               var sPath = "/SOInputSet"
+              oReturn = [];
 
               var _dados =	{
                 "ILifnr" : "",
@@ -82,43 +119,45 @@ sap.ui.define([
 
                   _dados.TChargSet.results = aLotes;
 
-                  oModelDados.create(sPath, _dados,  {
+                  oModelDados.create(sPath, _dados, {
                     success: function(data,response){
 
                       var that = this
 						          var aReturn = []
-						          var typeT = "Success"
+                      var _log = {};
+                      for (var z = 0; z < data.TReturnSet.results.length; z++){
+                        var _log = {"Lote": data.TReturnSet.results[z].Charg , 
+                                     "Mensagem" : data.TReturnSet.results[z].Description }
+                        aMensagem.push(_log);
 
-                      data.TReturnSet.results.forEach(
+                      };
+
+
+                      
+                      
+
+
+
+
+						        /* data.TReturnSet.results.forEach(
                         function(retorno){ 
+                      
+                         oLog.push((retorno));
+                         console.log("teste")
 
-                          switch (retorno.Type) {
-                            case 'E':
-                              typeT = "Error";
-                              break;
-                            case 'S':
-                              typeT = "Success";
-                              break;
-                            case 'W':
-                              typeT = "Warning";
-                              break;
-                            case '':
-                              typeT = "Success";
-                              break;
-                            }
-                            
-                          var oReturn = {
-                          type : typeT,
-                          title: retorno.Charg,
-                          description: retorno.Description,
-                          subtitle: retorno.Message,
-                          counter: 1,
-                          };
-                          aReturn.push(oReturn)
-                          }
-                      )
-                    }
-                  })
+                        }  //fim function retorno
+                       
+                      ); */// fim do foreach
+                      console.log("teste1");
+
+                      
+
+
+
+                    } //Fim do sucess
+                    
+                  }) //fim do oModelDados
+                  console.log("teste2");
                 }
               )
             },
@@ -224,7 +263,7 @@ sap.ui.define([
 
                
               }
-              //teste
+              
               this._onListaFornecedor().then(result => {
                 var oModelDados = new sap.ui.model.json.JSONModel(aData);
                 
