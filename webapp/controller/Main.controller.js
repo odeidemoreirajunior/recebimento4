@@ -4,15 +4,20 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",	
-    'sap/m/MessagePopover',
+    'sap/m/MessageView',
     'sap/m/MessageItem',
+    'sap/m/Popover',
+    'sap/m/Button',
+    'sap/m/Bar',
+    'sap/m/Title',
+    'sap/ui/core/IconPool',
 	"sap/ui/core/AbsoluteCSSSize",
 ],
     /**
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
     function (Controller,coreLibrary, 
-	  	JSONModel,	Filter,FilterOperator, MessagePopover, MessageItem, AbsoluteCSSSize) {
+	  	JSONModel,	Filter,FilterOperator,  MessageView, MessageItem, Popover, Button, Bar, Title, IconPool, AbsoluteCSSSize) {
         "use strict";
         var ValueState = coreLibrary.ValueState;
         var aFilters = [];
@@ -29,9 +34,9 @@ sap.ui.define([
           counter: 1,
           };
 
-        var oLog = [{}];
+
          
-        var oMessagePopover;
+        
       
         return Controller.extend("linkup.recebimento4.controller.Main", {
          
@@ -40,54 +45,101 @@ sap.ui.define([
             onInit: function () {
               var oModelSAP = this.getOwnerComponent().getModel();
               oModelSAP.setUseBatch(false);
-            },           
+            },  
+
             onValueChangeCombo: function(oEvent) {
               var oValidatedComboBox = oEvent.getSource(),
               sSelectedKey = oValidatedComboBox.getSelectedKey(),
               sValue = oValidatedComboBox.getValue();
       
-            if (!sSelectedKey && sValue) {
-              oValidatedComboBox.setValueState(ValueState.Error);
-              oValidatedComboBox.setValueStateText("Entrar com Fornecedor Válido!");
-            } else {
-              oValidatedComboBox.setValueState(ValueState.None);
-            }
+              if (!sSelectedKey && sValue) {
+                oValidatedComboBox.setValueState(ValueState.Error);
+                oValidatedComboBox.setValueStateText("Entrar com Fornecedor Válido!");
+              } else {
+                oValidatedComboBox.setValueState(ValueState.None);
+              }
 
             },
 
             _onLog : function(oEvent) {
-              //var oTable = sap.ui.getCore().byId("idTableItem");
-            
-              // Seleicionar a linha do click da tabela.
-          //    var _lote  = oEvent.getSource().getBindingContext().getProperty("Lote")
-           //   var oVC = this.byId("oVerticalContent");
+              var _logErro = [];
+               // Seleicionar a linha do click da tabela.
+               var _lote  = oEvent.getSource().getBindingContext().getProperty("Lote");
+              if (aMensagem.length == 0) {
+                return;
+
+              }
+               for (var a = 0; a < aMensagem.length; a++){
+                 if (_lote == aMensagem[a].title){
+                   _logErro.push(aMensagem[a]);
+                   
+                 };
+               }
              
               var oModel = new JSONModel();
-              oModel.setData(aMensagem);
-              this._oDialogDetalhes.setModel(oModel,"Messages");
-              
-              var oMessageTemplate = new MessageItem({
-                type: '{Type}',
-                title: '{Lote}',
-              //  activeTitle: "{active}",
-                description: '{Mensagem}',
-            //    subtitle: '{subtitle}',
-              //  counter: '{counter}'
-                
-              });  
+              oModel.setData(_logErro);
 
-              oMessagePopover = new MessagePopover({
-                items: {
-                  path: '/Messages',
-                  template: oMessageTemplate
+              var oMessageTemplate = new MessageItem({
+                type: '{type}',
+                title: '{title}',
+                description: '{description}',
+                subtitle: '{subtitle}',
+                counter: '{counter}',
+                markupDescription: '{markupDescription}'
+                
+              });
+
+              this.oMessageView = new MessageView({
+                showDetailsPageHeader: false,
+                itemSelect: function () {
+                  oBackButton.setVisible(true);
                 },
-                activeTitlePress: function () {
-                  MessageToast.show('Active title is pressed');
+                items: {
+                  path: "/",
+                  template: oMessageTemplate
                 }
               });
 
-              oMessagePopover.toggle(oEvent.getSource());
+              var that = this;
 
+              var oBackButton = new Button({
+                icon: IconPool.getIconURI("nav-back"),
+                visible: false,
+                press: function () {
+                  that.oMessageView.navigateBack();
+                  that._oPopover.focus();
+                  this.setVisible(false);
+                }
+              });
+              this.oMessageView.setModel(oModel);
+              var oCloseButton =  new Button({
+                text: "Fechar",
+                press: function () {
+                  that._oPopover.close();
+                }
+              }).addStyleClass("sapUiTinyMarginEnd"),
+              oPopoverFooter = new Bar({
+                contentRight: oCloseButton
+              }),
+              oPopoverBar = new Bar({
+                contentLeft: [oBackButton],
+                contentMiddle: [
+                  new Title({text: "Mensagens"})
+                ]
+              });
+
+
+              this._oPopover = new Popover({
+                customHeader: oPopoverBar,
+                contentWidth: "340px",
+                contentHeight: "340px",
+                verticalScrolling: false,
+                modal: true,
+                content: [this.oMessageView],
+                footer: oPopoverFooter
+              });
+              this.oMessageView.navigateBack();
+              this._oPopover.openBy(oEvent.getSource());
 
             },
 
@@ -96,6 +148,7 @@ sap.ui.define([
               return new Promise(function(resolve, reject) {	
                 var aLotes = [];
                 var oLote = {};
+                var _contador = 0;
                 var sPath = "/SOInputSet"
                 oReturn = [];
               
@@ -127,15 +180,19 @@ sap.ui.define([
                         switch(data.TReturnSet.results[z].Type) {
                           case "E":
                             var _erro = "Error";
+                            _contador++; 
                             break;
-                            case "S":
-                              _erro = "Success";
+                          case "S":
+                            _erro = "Success";
                               break;
                         }
 
-                        var _log = {"Lote": data.TReturnSet.results[z].Charg , 
-                                    "Mensagem" : data.TReturnSet.results[z].Description,
-                                    "Type" : _erro }
+                        var _log = { "type" : _erro,
+                                     "title": data.TReturnSet.results[z].Charg , 
+                                     "description" : data.TReturnSet.results[z].Description,
+                                     "subtitle" : data.TReturnSet.results[z].Description,
+                                     "counter": _contador
+                                    }
                         aMensagem.push(_log);
                         aData.forEach(
                           function(oLine, index) {
@@ -163,30 +220,30 @@ sap.ui.define([
 
               //Bloquear a view e mostrar a tela processando  
               var oGlobalBusyDialog = new sap.m.BusyDialog();
-
+              aMensagem = [];
               oGlobalBusyDialog.open();
-
-
-
-
-
-              oLog = [{}];
+            
+              
               var _table = sap.ui.getCore().byId("idTableItem");
               var oModel = _table.getModel();
               var oModelDados = this.getView().getModel("ZSTSD364_SRV");
               var oData = oModel.oData;
    
               for (var i = 0;i < oData.length; i++ ){
-                await this._onProcessarReceb(oData[i].Fornecedor, oData[i].Lote, oModelDados).then(result => {
-               
-                    console.log("Logica aqui")
-        
-                },this).then(result => {
-                          
-                    console.log("Logica aqui1")
-                  
-                },this).catch(reason => {
-              });
+                if (oData[i].Fornecedor == ""){
+                  break;
+                };
+                  await this._onProcessarReceb(oData[i].Fornecedor, oData[i].Lote, oModelDados).then(result => {
+                
+                      console.log("Logica aqui")
+          
+                  },this).then(result => {
+                            
+                      console.log("Logica aqui1")
+                    
+                  },this).catch(reason => {
+                  });
+                
                 
               }
               //sap.ui.core.BusyIndicator.hide()
@@ -231,7 +288,7 @@ sap.ui.define([
                         };
                     } 
                     //Verifica se existe somente um registro para o fornecedor. Caso exista, ja seta um default.
-                    for ( var c = 0; aData.length; c++){
+                    for ( var c = 0; c < aData.length; c++){
                       if ( aData[c].fornecedor.length == 1){
                         aData[c].KeyValue = aData[c].fornecedor[0].Codigo
                       }
@@ -247,6 +304,9 @@ sap.ui.define([
             },
         
             onRecebimento: function(oEvent) {
+              var oGlobalBusyDialog = new sap.m.BusyDialog();
+              aMensagem = [];
+              oGlobalBusyDialog.open();
               aData = [];
               aCentros = [];
               aFilters = [];
@@ -295,7 +355,7 @@ sap.ui.define([
 
                 if (indices.length > 0){
                  // this.getView().setModel(oModelDados, "lista");
-                  
+                 oGlobalBusyDialog.close();
                   this._oDialogDetalhes.setModel(oModelDados)
                   this._oDialogDetalhes.open();  
                 }  //fim do se

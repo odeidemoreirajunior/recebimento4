@@ -8,83 +8,81 @@
      xmlns:html="http://www.w3.org/1999/xhtml">
 
    <m:Dialog title = "{i18n>titleItem}" 
-
         contentHeight="50%"
         contentWidth="63%"
-           class="dialog"  >
+        class="dialog"  >
      
-                <Table id="idTableItem"      
-                	selectionMode="None"
-				    visibleRowCount="7"   
+        <Table id="idTableItem"      
+            selectionMode="None"
+            visibleRowCount="7"   
 
-                    rows="{/}" >
-                   	<rowSettingsTemplate>
-				    	<RowSettings highlight="{Status}" highlightText="{Status}"/>
-				    </rowSettingsTemplate>
-	                <columns>
-                        <Column width="50px">
-						    <m:Label text="Log "/>
-						    <template>
-							    <m:Button id="messagePopoverBtn" icon="sap-icon://message-information"  press="_onLog"/>
-						    </template>
-					    </Column>
-                        <Column width="100px">
-                            <m:Label text="{i18n>textNfe}" />
-                            <template>
-                                <m:Text text="{Nfe}" wrapping="false" />
-                            </template>
-                        </Column>
-                        <Column width="110px">
-                            <m:Label text="{i18n>textLote}" />
-                            <template>
-                                <m:Text text="{Lote}" wrapping="false" />
-                            </template>
-                        </Column>
-                        <Column width="130px">
-                            <m:Label text="{i18n>textPeso}" />
-                            <template>
-                                <m:Label text="{
-								path: 'Peso',
-								type: 'sap.ui.model.type.Currenry'
-							}" />
-                            </template>
-                        </Column>
-                        <Column width="120px">
-                            <m:Label text="{i18n>textCentro_Origem}" />
-                            <template>
-                                <m:Text text="{Centro_Origem}" wrapping="false" />
-                            </template>
-                        </Column>
-                       
-                         <Column width="120px">
-                            <m:Label text="{i18n>textCentro_Destino}" />
-                            <template>
-                                <m:Text text="{Centro_Destino}" wrapping="false" />
-                            </template>
-                        </Column>
-                         <Column width="120px">
-                            <m:Label text="{i18n>textData_exp}" />
-                            <template>
-                            
-                                    <m:Text text="{dataexp}" wrapping="false" />
-                            </template>
-                        </Column>
-                        
-                         <Column width="180px">
-                            <m:Label text="{i18n>textFornecedor}" />
-                            <template>
-                               <m:ComboBox id="idComboForne"  value="{KeyValue}" items="{fornecedor/}" 	change="onValueChangeCombo">
-								    <c:Item key="{Codigo}" text="{Codigo}"/>
-							    </m:ComboBox>
-                            </template>
-                        </Column>
-                    </columns>
+            rows="{/}" >
+            <rowSettingsTemplate>
+                <RowSettings highlight="{Status}" highlightText="{Status}"/>
+            </rowSettingsTemplate>
+            <columns>
+                <Column width="50px">
+                    <m:Label text="Log "/>
+                    <template>
+                        <m:Button id="messagePopoverBtn" icon="sap-icon://message-information"  press="_onLog"/>
+                    </template>
+                </Column>
+                <Column width="100px">
+                    <m:Label text="{i18n>textNfe}" />
+                    <template>
+                        <m:Text text="{Nfe}" wrapping="false" />
+                    </template>
+                </Column>
+                <Column width="110px">
+                    <m:Label text="{i18n>textLote}" />
+                    <template>
+                        <m:Text text="{Lote}" wrapping="false" />
+                    </template>
+                </Column>
+                <Column width="130px">
+                    <m:Label text="{i18n>textPeso}" />
+                    <template>
+                        <m:Label text="{
+                        path: 'Peso',
+                        type: 'sap.ui.model.type.Currenry'
+                    }" />
+                    </template>
+                </Column>
+                <Column width="120px">
+                    <m:Label text="{i18n>textCentro_Origem}" />
+                    <template>
+                        <m:Text text="{Centro_Origem}" wrapping="false" />
+                    </template>
+                </Column>
+                
+                    <Column width="120px">
+                    <m:Label text="{i18n>textCentro_Destino}" />
+                    <template>
+                        <m:Text text="{Centro_Destino}" wrapping="false" />
+                    </template>
+                </Column>
+                    <Column width="120px">
+                    <m:Label text="{i18n>textData_exp}" />
+                    <template>
                     
-                </Table>    
+                            <m:Text text="{dataexp}" wrapping="false" />
+                    </template>
+                </Column>
+                
+                    <Column width="180px">
+                    <m:Label text="{i18n>textFornecedor}" />
+                    <template>
+                        <m:ComboBox id="idComboForne" value="{KeyValue}" items="{fornecedor/}" 	change="onValueChangeCombo">
+                            <c:Item key="{Codigo}"  required="true"  text="{Codigo}"/>
+                        </m:ComboBox>
+                    </template>
+                </Column>
+            </columns>
+        </Table>  
                 	
-                 <m:buttons>
-                    <m:Button type="Accept" press="onProcess" text="Processar"/>
-                 	<m:Button type="Emphasized" press="onCancel" text="Fechar"/>
-                  </m:buttons>
+        <m:buttons>
+        <m:Button type="Accept" press="onProcess" text="Processar"/>
+        <m:Button type="Emphasized" press="onCancel" text="Fechar"/>
+        </m:buttons>
    </m:Dialog>
 </core:FragmentDefinition>
