@@ -14,7 +14,7 @@ sap.ui.define([
     function (Controller,coreLibrary, 
 	  	JSONModel,	Filter,FilterOperator, MessagePopover, MessageItem, AbsoluteCSSSize) {
         "use strict";
-
+        var ValueState = coreLibrary.ValueState;
         var aFilters = [];
         var aCentros = [];
         var aData = [];
@@ -41,13 +41,26 @@ sap.ui.define([
               var oModelSAP = this.getOwnerComponent().getModel();
               oModelSAP.setUseBatch(false);
             },           
-       
+            onValueChangeCombo: function(oEvent) {
+              var oValidatedComboBox = oEvent.getSource(),
+              sSelectedKey = oValidatedComboBox.getSelectedKey(),
+              sValue = oValidatedComboBox.getValue();
+      
+            if (!sSelectedKey && sValue) {
+              oValidatedComboBox.setValueState(ValueState.Error);
+              oValidatedComboBox.setValueStateText("Entrar com Fornecedor Válido!");
+            } else {
+              oValidatedComboBox.setValueState(ValueState.None);
+            }
+
+            },
+
             _onLog : function(oEvent) {
               //var oTable = sap.ui.getCore().byId("idTableItem");
             
               // Seleicionar a linha do click da tabela.
-              var _lote  = oEvent.getSource().getBindingContext().getProperty("Lote")
-              var oVC = this.byId("oVerticalContent");
+          //    var _lote  = oEvent.getSource().getBindingContext().getProperty("Lote")
+           //   var oVC = this.byId("oVerticalContent");
              
               var oModel = new JSONModel();
               oModel.setData(aMensagem);
@@ -65,7 +78,7 @@ sap.ui.define([
 
               oMessagePopover = new MessagePopover({
                 items: {
-                  path: '/Messages/',
+                  path: '/Messages',
                   template: oMessageTemplate
                 },
                 activeTitlePress: function () {
@@ -146,7 +159,16 @@ sap.ui.define([
             },
           
             onProcess: async function(){
-              sap.ui.core.BusyIndicator.show();
+             // sap.ui.core.BusyIndicator.show();
+
+              //Bloquear a view e mostrar a tela processando  
+              var oGlobalBusyDialog = new sap.m.BusyDialog();
+
+              oGlobalBusyDialog.open();
+
+
+
+
 
               oLog = [{}];
               var _table = sap.ui.getCore().byId("idTableItem");
@@ -167,7 +189,8 @@ sap.ui.define([
               });
                 
               }
-              sap.ui.core.BusyIndicator.hide()
+              //sap.ui.core.BusyIndicator.hide()
+              oGlobalBusyDialog.close();
            
               sap.ui.getCore().byId("idTableItem").getModel().refresh(true) ;
             },
@@ -201,15 +224,18 @@ sap.ui.define([
                       
                         if ( oData.results[a].Werks == aData[b].Centro_Origem){ 
                           sCodigo.Codigo = oData.results[a].Lifnr;
-                          if ( oData.results.length == 1){
-                            sCodigo.keyValue = oData.results[a].Lifnr;
-                          }
-                          aData[b].fornecedor.push({"Codigo": sCodigo.Codigo, "key":  sCodigo.keyValue   });
+                          aData[b].fornecedor.push({"Codigo": sCodigo.Codigo  });
                           sCodigo.Codigo = "";
                          
                           
                         };
-                    }  
+                    } 
+                    //Verifica se existe somente um registro para o fornecedor. Caso exista, ja seta um default.
+                    for ( var c = 0; aData.length; c++){
+                      if ( aData[c].fornecedor.length == 1){
+                        aData[c].KeyValue = aData[c].fornecedor[0].Codigo
+                      }
+                    }
                   }.bind(this), 
 
                   error: function(oError) {
@@ -249,7 +275,8 @@ sap.ui.define([
                 selectedEntries.Item_ov = oTable.getTable().getRows()[no1].getCells()[6].getText();
                 selectedEntries.dataexp = oTable.getTable().getRows()[no1].getCells()[7].getText();
                 selectedEntries.Material = oTable.getTable().getRows()[no1].getCells()[8].getText();
-                selectedEntries.Status = "None"
+                selectedEntries.Status = "None";
+                selectedEntries.KeyValue = "";
                 aData.push(selectedEntries);
                 selectedEntries = { fornecedor: [] };
                
@@ -267,7 +294,7 @@ sap.ui.define([
                 jQuery.sap.syncStyleClass("sapUiSizeCompact", this.getView(), this._oDialogDetalhes);
 
                 if (indices.length > 0){
-                  this.getView().setModel(oModelDados, "lista");
+                 // this.getView().setModel(oModelDados, "lista");
                   
                   this._oDialogDetalhes.setModel(oModelDados)
                   this._oDialogDetalhes.open();  
