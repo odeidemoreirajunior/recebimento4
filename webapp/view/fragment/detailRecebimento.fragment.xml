@@ -69,11 +69,14 @@
                     </template>
                 </Column>
                 
-                    <Column width="180px">
+                    <Column width="400px">
                     <m:Label text="{i18n>textFornecedor}" />
                     <template>
-                        <m:ComboBox id="idComboForne" value="{KeyValue}" items="{fornecedor/}" 	change="onValueChangeCombo">
-                            <c:Item key="{Codigo}"  required="true"  text="{Codigo}"/>
+                        
+                        <m:ComboBox id="idComboForne" value="{KeyValue}"  
+                            width="400px" 
+                              items="{fornecedor/}" 	change="onValueChangeCombo"    >
+                            <c:Item key="{Codigo}" text="{Name1} "  additionalText="{Codigo}"/>
                         </m:ComboBox>
                     </template>
                 </Column>

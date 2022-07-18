@@ -48,6 +48,8 @@ sap.ui.define([
             },  
 
             onValueChangeCombo: function(oEvent) {
+              
+
               var oValidatedComboBox = oEvent.getSource(),
               sSelectedKey = oValidatedComboBox.getSelectedKey(),
               sValue = oValidatedComboBox.getValue();
@@ -61,7 +63,8 @@ sap.ui.define([
 
             },
 
-            _onLog : function(oEvent) {
+            _o
+            nLog : function(oEvent) {
               var _logErro = [];
                // Seleicionar a linha do click da tabela.
                var _lote  = oEvent.getSource().getBindingContext().getProperty("Lote");
@@ -215,9 +218,9 @@ sap.ui.define([
               }.bind(this));
             },
           
-            onProcess: async function(){
+            onProcess: async function(oEvent){
              // sap.ui.core.BusyIndicator.show();
-
+           
               //Bloquear a view e mostrar a tela processando  
               var oGlobalBusyDialog = new sap.m.BusyDialog();
               aMensagem = [];
@@ -230,10 +233,10 @@ sap.ui.define([
               var oData = oModel.oData;
    
               for (var i = 0;i < oData.length; i++ ){
-                if (oData[i].Fornecedor == ""){
+                if (oData[i].KeyValue == ""){
                   break;
                 };
-                  await this._onProcessarReceb(oData[i].Fornecedor, oData[i].Lote, oModelDados).then(result => {
+                  await this._onProcessarReceb(oData[i].KeyValue, oData[i].Lote, oModelDados).then(result => {
                 
                       console.log("Logica aqui")
           
@@ -265,7 +268,8 @@ sap.ui.define([
               var sLifnr = [];
               var oModel = this.getView().getModel("ZSTSD364_SRV");
               var sPath = "/ListaFornecedorSet";
-              var sCodigo =  {"Codigo": ""
+              var sCodigo =  {"Codigo": "",
+                              "Name1": ""
             };
 
               return new Promise(function(resolve, reject) {	
@@ -281,8 +285,10 @@ sap.ui.define([
                       
                         if ( oData.results[a].Werks == aData[b].Centro_Origem){ 
                           sCodigo.Codigo = oData.results[a].Lifnr;
-                          aData[b].fornecedor.push({"Codigo": sCodigo.Codigo  });
+                         
+                          aData[b].fornecedor.push({"Codigo": sCodigo.Codigo , "Name1": oData.results[a].Name1 });
                           sCodigo.Codigo = "";
+                          sCodigo.Name1 = "";
                          
                           
                         };
@@ -290,7 +296,7 @@ sap.ui.define([
                     //Verifica se existe somente um registro para o fornecedor. Caso exista, ja seta um default.
                     for ( var c = 0; c < aData.length; c++){
                       if ( aData[c].fornecedor.length == 1){
-                        aData[c].KeyValue = aData[c].fornecedor[0].Codigo
+                        aData[c].KeyValue = aData[c].fornecedor[0].Name1;
                       }
                     }
                   }.bind(this), 
@@ -304,6 +310,7 @@ sap.ui.define([
             },
         
             onRecebimento: function(oEvent) {
+             
               var oGlobalBusyDialog = new sap.m.BusyDialog();
               aMensagem = [];
               oGlobalBusyDialog.open();
@@ -321,20 +328,51 @@ sap.ui.define([
               var indices = oTable.getTable().getSelectedIndices();
               // Quantidade de linhas selecionadas.
               var count = indices.length;
-              //---------------------------------------------------------------------------------------
-              for(var a=0;a<count;a++){
-                var no1 = indices[a];
 
-                selectedEntries.Nfe = oTable.getTable().getRows()[no1].getCells()[0].getText();
-                selectedEntries.Lote = oTable.getTable().getRows()[no1].getCells()[1].getText();
-                selectedEntries.Peso = oTable.getTable().getRows()[no1].getCells()[2].getText();
-                selectedEntries.Centro_Origem = oTable.getTable().getRows()[no1].getCells()[3].getText();
+           
+        /*      for (var i = 0; i < indices.length; i++) {
+                var j = indices[i];
+                
+                selectedEntries.Nfe = oTable.getTable().getContextByIndex(0).getProperty("Lote")
+
+                
+              }*/
+
+
+              //---------------------------------------------------------------------------------------
+              //for(var a=0;a<indices.length;a++){
+              for(var a=0;a<count;a++){                
+                var no1 = indices[a];
+                
+                //selectedEntries.Nfe = oTable.getTable().getRows()[no1].getCells()[0].getText();
+                selectedEntries.Nfe = oTable.getTable().getContextByIndex(no1).getProperty("nfenum")
+
+                //selectedEntries.Lote = oTable.getTable().getRows()[no1].getCells()[1].getText();
+                selectedEntries.Lote = oTable.getTable().getContextByIndex(no1).getProperty("Lote");
+
+//                selectedEntries.Peso = oTable.getTable().getRows()[no1].getCells()[2].getText();
+                selectedEntries.Peso = oTable.getTable().getContextByIndex(no1).getProperty("clabs");
+                
+                //selectedEntries.Centro_Origem = oTable.getTable().getRows()[no1].getCells()[3].getText();
+                selectedEntries.Centro_Origem = oTable.getTable().getContextByIndex(no1).getProperty("Centro_Origem");
                 this._createFilter(selectedEntries.Centro_Origem);
-                selectedEntries.Centro_Destino = oTable.getTable().getRows()[no1].getCells()[4].getText();
-                selectedEntries.OV = oTable.getTable().getRows()[no1].getCells()[5].getText();
-                selectedEntries.Item_ov = oTable.getTable().getRows()[no1].getCells()[6].getText();
-                selectedEntries.dataexp = oTable.getTable().getRows()[no1].getCells()[7].getText();
-                selectedEntries.Material = oTable.getTable().getRows()[no1].getCells()[8].getText();
+
+//                selectedEntries.Centro_Destino = oTable.getTable().getRows()[no1].getCells()[4].getText();
+                selectedEntries.Centro_Destino = oTable.getTable().getContextByIndex(no1).getProperty("Centro_Destino");
+
+                //selectedEntries.OV = oTable.getTable().getRows()[no1].getCells()[5].getText();
+                selectedEntries.OV = oTable.getTable().getContextByIndex(no1).getProperty("ov");
+             
+//              selectedEntries.Item_ov = oTable.getTable().getRows()[no1].getCells()[6].getText();
+                selectedEntries.Item_ov = oTable.getTable().getContextByIndex(no1).getProperty("item_ov")
+                
+                //selectedEntries.dataexp = oTable.getTable().getRows()[no1].getCells()[7].getText();
+                selectedEntries.dataexp = oTable.getTable().getContextByIndex(no1).getProperty("data_expedicao")
+                
+                //selectedEntries.Material = oTable.getTable().getRows()[no1].getCells()[8].getText();
+               //selectedEntries.Material = oTable.getTable().getContextByIndex(no1).getProperty("material")
+                
+                
                 selectedEntries.Status = "None";
                 selectedEntries.KeyValue = "";
                 aData.push(selectedEntries);

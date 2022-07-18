@@ -36,7 +36,7 @@
                 }
             },
             "annotations": {
-                "uri": "sap/opu/odata/iwfnd/catalogservice;v=2/Annotations(TechnicalName='ZCDS_ZSTSD125_CDS_VAN',Version='0001')/$value/",
+                "uri": "/sap/opu/odata/iwfnd/CATALOGSERVICE;v=2/Annotations(TechnicalName='ZCDS_ZSTSD125_CDS_VAN',Version='0001')/$value/",
                 "type": "ODataAnnotation",
                 "settings": {
                   "localUri": "annotations/annotations.xml"

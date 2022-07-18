@@ -39,8 +39,7 @@
 									smartFilterId="smartFilterBar"
 									tableType="Table" 
 									header="{i18n>titleItem}" 
-                                    demandPopin="true"
-									growing="true"
+                                 
 									placeToolbarInTable="true"
 									persistencyKey="SmartFilter_Receb" 
 									enableAutoBinding="true"
