@@ -72,11 +72,10 @@
                     <Column width="400px">
                     <m:Label text="{i18n>textFornecedor}" />
                     <template>
-                        
-                        <m:ComboBox id="idComboForne" value="{KeyValue}"  
+                        <m:ComboBox id="idComboForne" value="{KeyValue}" showSecondaryValues="true"
                             width="400px" 
-                              items="{fornecedor/}" 	change="onValueChangeCombo"    >
-                            <c:Item key="{Codigo}" text="{Name1} "  additionalText="{Codigo}"/>
+                              items="{fornecedor/}" change="onValueChangeCombo">
+                            <c:ListItem key="{Codigo}" text="{Codigo}" additionalText="{Name1}"/>
                         </m:ComboBox>
                     </template>
                 </Column>

@@ -63,8 +63,7 @@ sap.ui.define([
 
             },
 
-            _o
-            nLog : function(oEvent) {
+            _onLog : function(oEvent) {
               var _logErro = [];
                // Seleicionar a linha do click da tabela.
                var _lote  = oEvent.getSource().getBindingContext().getProperty("Lote");
@@ -211,7 +210,11 @@ sap.ui.define([
                           
                       resolve(data);	
                      
-                  }
+                  }.bind(this),
+                  error: function(oError) {
+                    console.log('Errrouuuuu')
+                    reject(oError);
+                        }.bind(this)
                   
                 })
                 
@@ -257,6 +260,9 @@ sap.ui.define([
 
             onCancel: function(){
               this._oDialogDetalhes.close();
+             
+           
+              
             },
 
             _createFilter: function(sValue) {
@@ -296,7 +302,10 @@ sap.ui.define([
                     //Verifica se existe somente um registro para o fornecedor. Caso exista, ja seta um default.
                     for ( var c = 0; c < aData.length; c++){
                       if ( aData[c].fornecedor.length == 1){
-                        aData[c].KeyValue = aData[c].fornecedor[0].Name1;
+                        aData[c].KeyValue = aData[c].fornecedor[0].Codigo;
+                        aData[c].Name1 = aData[c].fornecedor[0].Name1;
+                     
+
                       }
                     }
                   }.bind(this), 

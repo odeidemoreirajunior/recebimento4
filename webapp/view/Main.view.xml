@@ -39,12 +39,10 @@
 									smartFilterId="smartFilterBar"
 									tableType="Table" 
 									header="{i18n>titleItem}" 
-                                 
 									placeToolbarInTable="true"
 									persistencyKey="SmartFilter_Receb" 
 									enableAutoBinding="true"
 									showRowCount="true"
-									
 									beforeRebindTable="onDataReceived"
 									
 									>
