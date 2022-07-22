@@ -44,8 +44,8 @@
 									enableAutoBinding="true"
 									showRowCount="true"
 									beforeRebindTable="onDataReceived"
-									
-									>
+>
+
 
 				<smartTable:customToolbar>
                     <OverflowToolbar design="Transparent">

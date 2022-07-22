@@ -9,6 +9,7 @@ sap.ui.define([
     'sap/m/Popover',
     'sap/m/Button',
     'sap/m/Bar',
+    "sap/m/MessageBox",
     'sap/m/Title',
     'sap/ui/core/IconPool',
 	"sap/ui/core/AbsoluteCSSSize",
@@ -17,7 +18,7 @@ sap.ui.define([
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
     function (Controller,coreLibrary, 
-	  	JSONModel,	Filter,FilterOperator,  MessageView, MessageItem, Popover, Button, Bar, Title, IconPool, AbsoluteCSSSize) {
+	  	JSONModel,	Filter,FilterOperator,  MessageView, MessageItem, Popover, Button, Bar, MessageBox, Title, IconPool, AbsoluteCSSSize) {
         "use strict";
         var ValueState = coreLibrary.ValueState;
         var aFilters = [];
@@ -182,7 +183,7 @@ sap.ui.define([
                         switch(data.TReturnSet.results[z].Type) {
                           case "E":
                             var _erro = "Error";
-                            _contador++; 
+                            _contador ++; 
                             break;
                           case "S":
                             _erro = "Success";
@@ -192,8 +193,8 @@ sap.ui.define([
                         var _log = { "type" : _erro,
                                      "title": data.TReturnSet.results[z].Charg , 
                                      "description" : data.TReturnSet.results[z].Description,
-                                     "subtitle" : data.TReturnSet.results[z].Description,
-                                     "counter": _contador
+                                     "subtitle" : data.TReturnSet.results[z].Description
+                                     //"counter": _contador
                                     }
                         aMensagem.push(_log);
                         aData.forEach(
@@ -222,7 +223,7 @@ sap.ui.define([
             },
           
             onProcess: async function(oEvent){
-             // sap.ui.core.BusyIndicator.show();
+             
            
               //Bloquear a view e mostrar a tela processando  
               var oGlobalBusyDialog = new sap.m.BusyDialog();
@@ -235,10 +236,18 @@ sap.ui.define([
               var oModelDados = this.getView().getModel("ZSTSD364_SRV");
               var oData = oModel.oData;
    
+         
+         
+
               for (var i = 0;i < oData.length; i++ ){
-                if (oData[i].KeyValue == ""){
-                  break;
-                };
+                //if (oData[i].KeyValue == ""){
+                //  break;
+                //};
+                //Validar se existe algum na lista ja processado com sucesso
+                if (oData[i].Status == "Success"){
+                 break;
+                }
+
                   await this._onProcessarReceb(oData[i].KeyValue, oData[i].Lote, oModelDados).then(result => {
                 
                       console.log("Logica aqui")
@@ -252,7 +261,7 @@ sap.ui.define([
                 
                 
               }
-              //sap.ui.core.BusyIndicator.hide()
+
               oGlobalBusyDialog.close();
            
               sap.ui.getCore().byId("idTableItem").getModel().refresh(true) ;
@@ -260,7 +269,7 @@ sap.ui.define([
 
             onCancel: function(){
               this._oDialogDetalhes.close();
-             
+              this.getView().getModel().refresh(true);
            
               
             },
@@ -289,7 +298,8 @@ sap.ui.define([
 
                       for (var b = 0; b < aData.length;b++)
                       
-                        if ( oData.results[a].Werks == aData[b].Centro_Origem){ 
+                        //if ( oData.results[a].Werks == aData[b].Centro_Origem){ 
+                        if ( oData.results[a].Werks == aData[b].Centro_Destino){ 
                           sCodigo.Codigo = oData.results[a].Lifnr;
                          
                           aData[b].fornecedor.push({"Codigo": sCodigo.Codigo , "Name1": oData.results[a].Name1 });
@@ -337,51 +347,28 @@ sap.ui.define([
               var indices = oTable.getTable().getSelectedIndices();
               // Quantidade de linhas selecionadas.
               var count = indices.length;
-
-           
-        /*      for (var i = 0; i < indices.length; i++) {
-                var j = indices[i];
-                
-                selectedEntries.Nfe = oTable.getTable().getContextByIndex(0).getProperty("Lote")
-
-                
-              }*/
-
-
-              //---------------------------------------------------------------------------------------
-              //for(var a=0;a<indices.length;a++){
+              if (count ==0){
+                oGlobalBusyDialog.close();
+               return;
+              }
+              if (count > 10){
+                MessageBox.information("Quantidade selecionada não pode ser maior que 10 itens!");
+             
+                oGlobalBusyDialog.close();
+                return;
+              }
               for(var a=0;a<count;a++){                
                 var no1 = indices[a];
-                
-                //selectedEntries.Nfe = oTable.getTable().getRows()[no1].getCells()[0].getText();
                 selectedEntries.Nfe = oTable.getTable().getContextByIndex(no1).getProperty("nfenum")
-
-                //selectedEntries.Lote = oTable.getTable().getRows()[no1].getCells()[1].getText();
                 selectedEntries.Lote = oTable.getTable().getContextByIndex(no1).getProperty("Lote");
-
-//                selectedEntries.Peso = oTable.getTable().getRows()[no1].getCells()[2].getText();
                 selectedEntries.Peso = oTable.getTable().getContextByIndex(no1).getProperty("clabs");
-                
-                //selectedEntries.Centro_Origem = oTable.getTable().getRows()[no1].getCells()[3].getText();
                 selectedEntries.Centro_Origem = oTable.getTable().getContextByIndex(no1).getProperty("Centro_Origem");
-                this._createFilter(selectedEntries.Centro_Origem);
-
-//                selectedEntries.Centro_Destino = oTable.getTable().getRows()[no1].getCells()[4].getText();
+                //this._createFilter(selectedEntries.Centro_Origem);
                 selectedEntries.Centro_Destino = oTable.getTable().getContextByIndex(no1).getProperty("Centro_Destino");
-
-                //selectedEntries.OV = oTable.getTable().getRows()[no1].getCells()[5].getText();
+                this._createFilter(selectedEntries.Centro_Destino);  
                 selectedEntries.OV = oTable.getTable().getContextByIndex(no1).getProperty("ov");
-             
-//              selectedEntries.Item_ov = oTable.getTable().getRows()[no1].getCells()[6].getText();
                 selectedEntries.Item_ov = oTable.getTable().getContextByIndex(no1).getProperty("item_ov")
-                
-                //selectedEntries.dataexp = oTable.getTable().getRows()[no1].getCells()[7].getText();
                 selectedEntries.dataexp = oTable.getTable().getContextByIndex(no1).getProperty("data_expedicao")
-                
-                //selectedEntries.Material = oTable.getTable().getRows()[no1].getCells()[8].getText();
-               //selectedEntries.Material = oTable.getTable().getContextByIndex(no1).getProperty("material")
-                
-                
                 selectedEntries.Status = "None";
                 selectedEntries.KeyValue = "";
                 aData.push(selectedEntries);
@@ -402,7 +389,7 @@ sap.ui.define([
 
                 if (indices.length > 0){
                  // this.getView().setModel(oModelDados, "lista");
-                 oGlobalBusyDialog.close();
+                  oGlobalBusyDialog.close();
                   this._oDialogDetalhes.setModel(oModelDados)
                   this._oDialogDetalhes.open();  
                 }  //fim do se
@@ -412,6 +399,7 @@ sap.ui.define([
               }).catch(reason => {
                       
               });
+
 
             },
 

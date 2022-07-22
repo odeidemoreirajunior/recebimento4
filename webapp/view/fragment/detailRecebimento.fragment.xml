@@ -14,7 +14,7 @@
      
         <Table id="idTableItem"      
             selectionMode="None"
-            visibleRowCount="7"   
+            visibleRowCount="10"   
 
             rows="{/}" >
             <rowSettingsTemplate>
