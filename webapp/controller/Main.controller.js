@@ -12,13 +12,16 @@ sap.ui.define([
     "sap/m/MessageBox",
     'sap/m/Title',
     'sap/ui/core/IconPool',
-	"sap/ui/core/AbsoluteCSSSize",
+    "sap/ui/core/AbsoluteCSSSize",
+    "sap/ui/core/util/File",
+    "sap/m/PDFViewer",
 ],
     /**
      * @param {typeof sap.ui.core.mvc.Controller} Controller
      */
     function (Controller,coreLibrary, 
-	  	JSONModel,	Filter,FilterOperator,  MessageView, MessageItem, Popover, Button, Bar, MessageBox, Title, IconPool, AbsoluteCSSSize) {
+	  	JSONModel,	Filter,FilterOperator,  MessageView, MessageItem, Popover, Button, Bar, MessageBox, 
+      Title, IconPool, AbsoluteCSSSize,File, PDFViewer) {
         "use strict";
         var ValueState = coreLibrary.ValueState;
         var aFilters = [];
@@ -227,8 +230,8 @@ sap.ui.define([
            
               //Bloquear a view e mostrar a tela processando  
               var oGlobalBusyDialog = new sap.m.BusyDialog();
-              aMensagem = [];
               oGlobalBusyDialog.open();
+              aMensagem = [];
             
               
               var _table = sap.ui.getCore().byId("idTableItem");
@@ -468,5 +471,224 @@ sap.ui.define([
                     i++;
                 });
             },
+
+            onDowXML: function (oEvent) {
+
+              //Bloquear a view e mostrar a tela processando  
+              var oGlobalBusyDialog = new sap.m.BusyDialog();
+              oGlobalBusyDialog.open();
+
+              var bCompact = !!this.getView().$().closest(".sapUiSizeCompact")
+                .length;
+              var oTable = this.byId("smartTable").getTable();
+              var oRows = oTable.getRows();
+              var oSelIndices = oTable.getSelectedIndices();
+              var that = this;
+    
+              if (oSelIndices.length == 0) {
+                MessageBox.warning(
+                  this.getView()
+                    .getModel("i18n")
+                    .getResourceBundle()
+                    .getText("msgBoxNoItem"),
+                  {
+                    styleClass: bCompact ? "sapUiSizeCompact" : "",
+                  }
+                );
+                return;
+              }
+    
+              //nf is ok
+              var sNfs = "";
+              for (var i of oSelIndices) {
+                if(!oTable.getContextByIndex(i).getProperty("nfenum")){
+                  if(sNfs==""){
+                    sNfs = oTable.getContextByIndex(i).getProperty("docnum");
+                  }else{
+                    sNfs = sNfs + ", " + oTable.getContextByIndex(i).getProperty("docnum");
+                  }
+                }
+              }
+    
+              if(sNfs !== ""){
+                MessageBox.error(
+                  this.getView()
+                    .getModel("i18n")
+                    .getResourceBundle()
+                    .getText("msgNfNaoAutorizada2", [sNfs])
+                );
+              }
+    
+              var oModel = that.getView().getModel("ZSTSD364_SRV");
+              var oLineItemArray = [];
+    
+              for (var i of oSelIndices) {
+                var oObject = oTable.getContextByIndex(i);
+                console.log(
+                  oObject.getProperty("docnum") +
+                    " " +
+                    oObject.getProperty("Itmnum")
+                );
+                oLineItemArray.push({
+                  Docnum: oObject.getProperty("docnum"),
+                  NfeNum: oObject.getProperty("nfenum"),
+
+               
+                });
+              }
+    
+              //Sort Array
+              oLineItemArray.sort(function (a, b) {
+                return a["Docnum"] - b["Docnum"] || a["Itmnum"] - b["Itmnum"];
+              });
+    
+              //Set deferred groups and create Function Imports
+              oModel.setDeferredGroups(["batchFunctionImport"]);
+              for (i = 0; i < oLineItemArray.length; i++) {
+                if (oLineItemArray[i].Docnum == ""){
+                  oGlobalBusyDialog.close();
+                  break;
+                }
+
+                oModel.callFunction("/DownloadXML", {
+                  method: "GET",
+                  groupId: "batchFunctionImport",
+                  changeSetId: "batch" + i,
+                  refreshAfterChange: "true",
+                  urlParameters: {
+                    Docnum: oLineItemArray[i].Docnum,
+                    Itmnum: oLineItemArray[i].Itmnum,
+                    Nfenum: oLineItemArray[i].NfeNum,
+                  },
+                });
+              }
+    
+              //Submitting the function import batch call
+              oModel.submitChanges({
+                groupId: "batchFunctionImport",
+                success: function (oData, sResponse) {
+                  //this.getView().byId("idUserDetTable").updateBindings();
+               //   that.byId("DynamicPage").setBusy(false);
+    
+                  var xmls = [];
+                  var aDown = [];
+    
+                  for (i = 0; i < oData.__batchResponses.length; i++) {
+                    var y;
+                    for (
+                      y = 0;
+                      y < oData.__batchResponses[i].data.results.length;
+                      y++
+                    ) {
+                      if (
+                        !aDown.includes(
+                          oData.__batchResponses[i].data.results[y].Docnum
+                        )
+                      ) {
+                        xmls.push({
+                          nfenum: oData.__batchResponses[i].data.results[y].Nfenum,
+                          docnum: oData.__batchResponses[i].data.results[y].Docnum,
+                          itmnum: oData.__batchResponses[i].data.results[y].Itmnum,
+                          xmltid: oData.__batchResponses[i].data.results[y].XmlTid,
+                          xmlnfe: oData.__batchResponses[i].data.results[y].XmlNfe,
+                        });
+                        aDown.push(
+                          oData.__batchResponses[i].data.results[y].Docnum
+                        );
+                      }
+                    }
+                  }
+    
+                  that.DownloadFile(xmls);
+                  oGlobalBusyDialog.close();
+                  oModel.refresh();
+                },
+                error: function (oError) {
+                  var sMensagem = JSONModel.parse(oError.responseText).error.message
+                    .value;
+                  that.byId("DynamicPage").setBusy(false);
+                  MessageBox.error(sMensagem);
+                },
+              });
+            },
+
+            DownloadFile: function (xmls) {
+              var z;
+              for (z = 0; z < xmls.length; z++) {
+                if (xmls[z].xmltid != "") {
+                  File.save(
+                    xmls[z].xmltid,
+                    "NF" + xmls[z].nfenum, //tid
+                    "xml",
+                    "application/xml"
+                  );
+                }
+                if (xmls[z].xmlnfe !== "") {
+                  File.save(
+                    xmls[z].xmlnfe,
+                    xmls[z].nfenum,
+                    "xml",
+                    "application/xml"
+                  );
+                }
+              }
+            },
+
+            onDowDanfe: function (oEvent) {
+              var bCompact = !!this.getView().$().closest(".sapUiSizeCompact")
+              .length;
+              var oTable = this.byId("smartTable").getTable("ZSTSD364_SRV");
+           
+              var oSelIndices = oTable.getSelectedIndices();
+         
+  
+              if (oSelIndices.length == 0) {
+                MessageBox.warning(
+                  this.getView()
+                    .getModel("i18n")
+                    .getResourceBundle()
+                    .getText("msgBoxNoItem"),
+                  {
+                    styleClass: bCompact ? "sapUiSizeCompact" : "",
+                  }
+                );
+                return;
+              } else if (oSelIndices.length > 1) {
+                MessageBox.warning(
+                  this.getView()
+                    .getModel("i18n")
+                    .getResourceBundle()
+                    .getText("msgBoxOnlyOne"),
+                  {
+                    styleClass: bCompact ? "sapUiSizeCompact" : "",
+                  }
+                );
+                return;
+              }
+  
+              for (var i of oSelIndices) {
+                var _docnum = oTable.getContextByIndex(i).getProperty("docnum");
+                break;
+              }
+  
+              //open pdf
+              var sUrl =
+                this.getView().getModel("ZSTSD364_SRV").sServiceUrl +
+                "/FileDanfeSet(DocNum='" +
+                _docnum + 
+               
+                "')/$value";
+    
+              var opdfViewer = new PDFViewer();
+              this.getView().addDependent(opdfViewer);
+              opdfViewer.setSource(sUrl);
+              opdfViewer.open();
+
+
+  
+  
+            }
+
+
         });
     });
