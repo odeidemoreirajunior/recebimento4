@@ -50,9 +50,9 @@
 				<smartTable:customToolbar>
                     <OverflowToolbar design="Transparent">
                        <ToolbarSpacer/>
-                        	<Button text="Recebimento" type="Transparent" press="onRecebimento"/>
-                       		<Button id="btnXML" text="{i18n>btnXML}" icon="sap-icon://download" tooltip="" press="onDowXML" visible="true"/>
-							<Button id="btnDanfe" text="{i18n>btnDanfe}" icon="sap-icon://download" tooltip="" press="onDowDanfe" visible="true"/>
+                        	<Button text="Recebimento" type="Transparent" icon="sap-icon://receipt" tooltip="Recebimento" press="onRecebimento"/>
+                       		<Button id="btnXML" text="{i18n>btnXML}" icon="sap-icon://download" tooltip="Downlaod XML" press="onDowXML" visible="true"/>
+							<Button id="btnDanfe" text="{i18n>btnDanfe}" icon="sap-icon://download" tooltip="Download DANFE" press="onDowDanfe" visible="true"/>
                         </OverflowToolbar>
                 </smartTable:customToolbar>
 

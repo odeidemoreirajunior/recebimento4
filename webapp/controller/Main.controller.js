@@ -623,14 +623,7 @@ sap.ui.define([
                     "application/xml"
                   );
                 }
-                if (xmls[z].xmlnfe !== "") {
-                  File.save(
-                    xmls[z].xmlnfe,
-                    xmls[z].nfenum,
-                    "xml",
-                    "application/xml"
-                  );
-                }
+
               }
             },
 
